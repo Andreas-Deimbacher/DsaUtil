@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+  <title>Hello, world!</title>
+</head>
+<body>
+<div class="container">
+  <form onsubmit="return false;">
+    <div id="main">
+
+    </div>
+    <hr>
+    <div id="meta">
+
+    </div>
+    <hr>
+    <div style="width: 100px">
+      <table class="table table-hover">
+        <thead>
+        </thead>
+        <tbody>
+        <tr>
+
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <button onclick="calc()" class="btn btn-primary">Calculate</button>
+  </form>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+<script>
+    $(document).ready(() => {
+        generate();
+    })
+
+    function generate() {
+        let $form = $('form div#main');
+        $form.append(getInput("Mut", "MU"));
+        $form.append(getInput("Klugheit", "KL"));
+        $form.append(getInput("Intuition", "IN"));
+        $form.append(getInput("Charisma", "CH"));
+        $form.append(getInput("Fingerfertigkeit", "FF"));
+        $form.append(getInput("Gewandheit", "GE"));
+        $form.append(getInput("Körperkraft", "KK"));
+
+        let $form2 = $('form div#meta');
+        $form2.append(getInput("Stufe", "ST"));
+        $form2.append(getInput("Abgerglaube", "AG"));
+
+        this.calc();
+        $('input').change(() => {
+            this.calc();
+        })
+    }
+
+    function get(id) {
+        const val = $(`#${id}`).val()
+        // alert(val);
+        return parseInt(val);
+    }
+
+    function appendTable($table, label, value) {
+        $table.append(`<tr><td>${label}</td><td>${value}</td></tr>`);
+    }
+
+    function calc() {
+        const character = {
+            MU: get('MU'),
+            KL: get('KL'),
+            IN: get('IN'),
+            CH: get('CH'),
+            FF: get('FF'),
+            GE: get('GE'),
+            KK: get('KK'),
+            ST: get('ST'),
+            AG: get('AG')
+        }
+
+        const $table = $('table tbody');
+        $table.empty();
+        appendTable($table, 'AT-Basis', Math.round((character.MU + character.GE + character.KK) / 5));
+        appendTable($table, 'PA-Basis', Math.round((character.IN + character.GE + character.KK) / 5));
+        appendTable($table, 'FK-Basis', Math.round((character.IN + character.FF + character.KK) / 4));
+        appendTable($table, 'Ausweichen', Math.round((character.MU + character.IN + character.GE) / 4));
+        appendTable($table, 'FK-Basis', Math.round((character.IN + character.FF + character.KK) / 4));
+        appendTable($table, 'MR', Math.round((character.MU + character.KL + character.ST) / 3 - 2 * character.AG));
+        localStorage.setItem('CharValues', JSON.stringify(character).toUpperCase());
+    }
+
+    function getInput(label, id) {
+        return `
+            <div class="row mb-3">
+              <label for="${id}" class="col-sm-2 col-form-label">${label}</label>
+              <div class="col-sm-3">
+                <input type="number" class="form-control" id="${id}" value="${getPreset(id)}">
+              </div>
+            </div>`;
+    }
+
+    function getPreset(id) {
+        let cookie = localStorage.getItem('CharValues');
+        if (cookie) {
+            const vals = JSON.parse(cookie);
+            return vals[id];
+        }
+        return 0
+    }
+</script>
+</body>
+</html>
