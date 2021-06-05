@@ -9,6 +9,7 @@
 <body>
 <div class="container">
   <form onsubmit="return false;">
+    <input id="submit-hidden" type="submit" style="display: none"/>
     <div id="main">
 
     </div>
@@ -50,8 +51,8 @@
         $form.append(getInput("Körperkraft", "KK"));
 
         let $form2 = $('form div#meta');
-        $form2.append(getInput("Stufe", "ST"));
-        $form2.append(getInput("Abgerglaube", "AG"));
+        $form2.append(getInput("Stufe", "ST", 1, 99));
+        $form2.append(getInput("Abgerglaube", "AG", 0, 6));
 
         this.calc();
         $('input').change(() => {
@@ -70,46 +71,53 @@
     }
 
     function calc() {
-        const character = {
-            MU: get('MU'),
-            KL: get('KL'),
-            IN: get('IN'),
-            CH: get('CH'),
-            FF: get('FF'),
-            GE: get('GE'),
-            KK: get('KK'),
-            ST: get('ST'),
-            AG: get('AG')
-        }
+        const $form = $('form');
+        const valid = $form[0].checkValidity();
+        if (!valid) {
+            //trigger html5-validation
+            $form.find("#submit-hidden").click();
+        } else {
+            const character = {
+                MU: get('MU'),
+                KL: get('KL'),
+                IN: get('IN'),
+                CH: get('CH'),
+                FF: get('FF'),
+                GE: get('GE'),
+                KK: get('KK'),
+                ST: get('ST'),
+                AG: get('AG')
+            }
 
-        const $table = $('table tbody');
-        $table.empty();
-        appendTable($table, 'AT-Basis', Math.round((character.MU + character.GE + character.KK) / 5));
-        appendTable($table, 'PA-Basis', Math.round((character.IN + character.GE + character.KK) / 5));
-        appendTable($table, 'FK-Basis', Math.round((character.IN + character.FF + character.KK) / 4));
-        appendTable($table, 'Ausweichen', Math.round((character.MU + character.IN + character.GE) / 4));
-        appendTable($table, 'FK-Basis', Math.round((character.IN + character.FF + character.KK) / 4));
-        appendTable($table, 'MR', Math.round((character.MU + character.KL + character.ST) / 3 - 2 * character.AG));
-        localStorage.setItem('CharValues', JSON.stringify(character).toUpperCase());
+            const $table = $('table tbody');
+            $table.empty();
+            appendTable($table, 'AT-Basis', Math.round((character.MU + character.GE + character.KK) / 5));
+            appendTable($table, 'PA-Basis', Math.round((character.IN + character.GE + character.KK) / 5));
+            appendTable($table, 'FK-Basis', Math.round((character.IN + character.FF + character.KK) / 4));
+            appendTable($table, 'Ausweichen', Math.round((character.MU + character.IN + character.GE) / 4));
+            appendTable($table, 'FK-Basis', Math.round((character.IN + character.FF + character.KK) / 4));
+            appendTable($table, 'MR', Math.round((character.MU + character.KL + character.ST) / 3 - 2 * character.AG));
+            localStorage.setItem('CharValues', JSON.stringify(character).toUpperCase());
+        }
     }
 
-    function getInput(label, id) {
+    function getInput(label, id, min = 8, max = 18) {
         return `
             <div class="row mb-3">
               <label for="${id}" class="col-sm-2 col-form-label">${label}</label>
               <div class="col-sm-3">
-                <input type="number" class="form-control" id="${id}" value="${getPreset(id)}">
+                <input type="number" min="${min}" max="${max}" class="form-control" id="${id}" value="${getPreset(id, min)}">
               </div>
             </div>`;
     }
 
-    function getPreset(id) {
+    function getPreset(id, min) {
         let cookie = localStorage.getItem('CharValues');
         if (cookie) {
             const vals = JSON.parse(cookie);
             return vals[id];
         }
-        return 0
+        return min;
     }
 </script>
 </body>
